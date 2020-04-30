@@ -1,0 +1,27 @@
+name: Atop Example 
+
+on: [push]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Atop
+      run: sudo apt-get update && sudo apt-get install atop -y 
+      
+    - name: Configure Atop
+      run: sudo sed -i 's#INTERVAL=600#INTERVAL=5#g' /usr/share/atop/atop.daily
+      
+    - name: Restart Atop
+      run: sudo systemctl restart atop
+      
+    - name: Sleep for 60 seconds
+      run: sleep 60
+    
+    - name: Tar the atop logs
+      run: tar -cvzf atop.tar.gz /var/log/atop/
+      
+    - uses: actions/upload-artifact@v2
+      with:	
+        name: 'atop_logs'
+        path: ${{ github.workspace }}/atop.tar.gz
